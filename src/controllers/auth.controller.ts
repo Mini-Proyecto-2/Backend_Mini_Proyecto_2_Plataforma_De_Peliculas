@@ -360,7 +360,7 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
 
 export async function deleteProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    const { password } = req.body;
+    const { password } = req.body.user;
 
     if (!password) {
       return res.status(400).json({ message: "Debes confirmar tu contraseña para eliminar la cuenta" });
