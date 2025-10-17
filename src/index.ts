@@ -13,11 +13,26 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 
+/**
+ * List of allowed origins for CORS
+ * @constant {string[]}
+ */
+const allowedOrigins = [
+  "http://localhost",
+  "*",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 const PORT = process.env.PORT || 4000;
-console.log('MONGODB_URI:', process.env.MONGODB_URI); // Verifica que la variable de entorno se esté leyendo correctamente
-
+app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
 /**
  * @description Connect to the database
  * @function

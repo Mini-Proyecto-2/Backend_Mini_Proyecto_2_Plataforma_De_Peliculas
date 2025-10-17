@@ -5,7 +5,7 @@
  */
 
 
-const User = require("../models/userModel");
+import User from "../models/user.model";
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 import { Request, Response, NextFunction } from "express";

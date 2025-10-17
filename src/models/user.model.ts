@@ -5,7 +5,6 @@
  */
 
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 
 /**
  * Schema for the `User` collection.
