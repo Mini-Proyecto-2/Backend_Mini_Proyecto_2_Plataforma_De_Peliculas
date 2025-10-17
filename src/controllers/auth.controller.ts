@@ -167,7 +167,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
  */
 
 
-exports.logout = (req: Request, res: Response, next: NextFunction) => {
+export async function logout(req: Request, res: Response, next: NextFunction) {
   try {
     res.clearCookie("token", {
       httpOnly: true,
@@ -193,7 +193,7 @@ exports.logout = (req: Request, res: Response, next: NextFunction) => {
  */
 
 
-exports.forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+export async function forgotPassword(req: Request, res: Response, next: NextFunction) {
   try {
     const { email } = req.body;
 
@@ -247,7 +247,7 @@ exports.forgotPassword = async (req: Request, res: Response, next: NextFunction)
  * @returns {JSON} Confirmation of password update.
  */
 
-exports.resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+export async function resetPassword(req: Request, res: Response, next: NextFunction) {
   try {
     const { token } = req.params;
     const { password } = req.body;
@@ -288,8 +288,9 @@ exports.resetPassword = async (req: Request, res: Response, next: NextFunction) 
  * @returns {JSON} User information without sensitive data.
  */
 
-exports.getProfile = async (req: Request, res: Response, next: NextFunction) => {
+export async function getProfile(req: Request, res: Response, next: NextFunction) {
   try {
+    console.log(req.body.user);
     const user = await User.findById(req.body.user.userId)
       .select("-password -resetPasswordToken -resetPasswordExpires");
     
@@ -318,9 +319,9 @@ exports.getProfile = async (req: Request, res: Response, next: NextFunction) => 
  * @returns {JSON} Updated user.
  */
 
-exports.updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+export async function updateProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    const { firstName, lastName, age, email } = req.body;
+    const { firstName, lastName, age, email } = req.body.user;
 
     // Validaciones
     if (!firstName || !lastName || !age || !email) {
@@ -356,7 +357,7 @@ exports.updateProfile = async (req: Request, res: Response, next: NextFunction) 
  */
 
 
-exports.deleteProfile = async (req: Request, res: Response, next: NextFunction) => {
+export async function deleteProfile(req: Request, res: Response, next: NextFunction) {
   try {
     const { password } = req.body;
 
@@ -397,7 +398,7 @@ exports.deleteProfile = async (req: Request, res: Response, next: NextFunction) 
  */
 
 
-exports.session = async (req: Request, res: Response) => {
+export async function session(req: Request, res: Response) {
   const token = req.cookies.token;
   if (!token) {
     return res.status(401).json({ loggedIn: false });

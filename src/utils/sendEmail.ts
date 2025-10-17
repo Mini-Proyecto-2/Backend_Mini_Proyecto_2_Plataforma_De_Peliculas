@@ -44,7 +44,7 @@ const sendEmail = async (options: EmailOptions): Promise<void> => {
     });
 
     const mailOptions = {
-        from: `"UnyFilm 👻" <${process.env.EMAIL_USER}>`,
+        from: `"Film Unity 👻" <${process.env.EMAIL_USER}>`,
         to: options.to,
         subject: options.subject,
         text: options.text || "", // opcional
