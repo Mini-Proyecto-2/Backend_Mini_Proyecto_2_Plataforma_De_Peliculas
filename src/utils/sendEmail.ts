@@ -22,8 +22,8 @@ const nodemailer = require("nodemailer");
  * @example
  * await sendEmail({
  *   to: "user@example.com",
- *   subject: "Welcome to Taskio 🎉",
- *   html: "<h1>Thank you for signing up for Taskio</h1>"
+ *   subject: "Welcome to Film Unity 🎉",
+ *   html: "<h1>Thank you for signing up for Film Unity</h1>"
  * });
  */
 

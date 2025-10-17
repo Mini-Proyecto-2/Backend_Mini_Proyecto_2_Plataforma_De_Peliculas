@@ -211,7 +211,7 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
     await user.save();
 
     // URL de recuperación
-    const resetURL = `${process.env.FRONTEND_URL}/#/reset-password?token=${resetToken}`;
+    const resetURL = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
 
     // Contenido del correo
     const message = `
@@ -223,7 +223,7 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
 
     await sendEmail({
       to: user.email,
-      subject: "Recupera tu contraseña - Taskio",
+      subject: "Recupera tu contraseña - Film Unity",
       html: message,
     });
 
@@ -251,6 +251,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
   try {
     const { token } = req.params;
     const { password } = req.body;
+    console.log(token, password);
 
     const user = await User.findOne({
       resetPasswordToken: token,
