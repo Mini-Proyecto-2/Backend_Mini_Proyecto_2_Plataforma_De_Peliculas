@@ -25,10 +25,7 @@ const allowedOrigins = [
 ];
 
 app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
+  cors()
 );
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
