@@ -60,7 +60,6 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
         });
     }
 
-    console.log("Password before hashing:", password);
 
     const hashedPassword = await bcrypt.hash(password, 10);
 

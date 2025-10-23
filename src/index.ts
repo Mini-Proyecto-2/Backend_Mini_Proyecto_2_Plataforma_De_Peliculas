@@ -4,6 +4,7 @@ import { connectDB } from './config/database';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
 import movieRoutes from './routes/movies.routes';
+import pexelsRoutes from './routes/pexels.routes';
 const cookieParser = require('cookie-parser');
 
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/pexels', pexelsRoutes);
 
 /**
  * List of allowed origins for CORS
