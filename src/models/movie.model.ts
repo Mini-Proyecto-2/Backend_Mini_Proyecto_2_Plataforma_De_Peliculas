@@ -7,28 +7,31 @@ const mongoose = require("mongoose");
 
 
 /**
- * Schema for the `Task` collection.
+ * Schema for the `Movie` collection.
  *
- * Represents a task associated with a user.
- * Includes title, detail, date, time, status, and calculated due date.
+ * Represents a movie associated with a user.
+ * Includes pexels data, video information, and user reference.
  *
  * @typedef {Object} Movie
- * @property {string} title - Task title (required, maximum 100 characters).
- * @property {string} [description] - Optional task detail (maximum 500 characters).
- * @property {string} videoUrl - Task date in `YYYY-MM-DD` format.
- * @property {Date} createdAt - Automatic task creation date.
+ * @property {string} pexelsId - Movie id (pexels id, required).
+ * @property {string} title - Movie title (required, maximum 100 characters).
+ * @property {string} videoUrl - Movie video url (required).
+ * @property {Date} createdAt - Movie creation date (automatic).
+ * @property {String} miniatureUrl - Movie miniature url (required).
+ * @property {mongoose.Types.ObjectId} userId - Reference to the user who added this movie.
  */
 
 
 const movieSchema = new mongoose.Schema({
-  title: {
+  pexelsId: {
     type: String,
     required: true,
     trim: true
   },
-  description: {
+  title: {
     type: String,
-    trim: true,
+    required: true,
+    trim: true
   },
   videoUrl: {
     type: String,
@@ -37,13 +40,22 @@ const movieSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  miniatureUrl: {
+    type: String,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Referencia al modelo User
+    required: true
   }
 });
 
 /**
- * Mongoose model for the `Task` collection.
+ * Mongoose model for the `Movie` collection.
  *
- * @type {mongoose.Model<Task>}
+ * @type {mongoose.Model<Movie>}
  */
 
 const Movie = mongoose.model('Movie', movieSchema);

@@ -60,7 +60,6 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
         });
     }
 
-    console.log("Password before hashing:", password);
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -291,8 +290,7 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
 
 export async function getProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    console.log(req.body.user);
-    const user = await User.findById(req.body.user.userId)
+    const user = await User.findById(req.user.userId)
       .select("-password -resetPasswordToken -resetPasswordExpires");
     
     if (!user) {
@@ -322,7 +320,7 @@ export async function getProfile(req: Request, res: Response, next: NextFunction
 
 export async function updateProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    const { firstName, lastName, age, email } = req.body.user;
+    const { firstName, lastName, age, email } = req.body;
 
     // Validaciones
     if (!firstName || !lastName || !age || !email) {
@@ -330,7 +328,7 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.body.user.userId, // ⚡ siempre usa el id del token, no del body
+      req.user.userId, // ⚡ siempre usa el id del token, no del body
       { firstName, lastName, age, email },
       { new: true, runValidators: true, context: "query" }
     ).select("-password -resetPasswordToken -resetPasswordExpires");
@@ -360,13 +358,13 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
 
 export async function deleteProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    const { password } = req.body.user;
+    const { password } = req.body;
 
     if (!password) {
       return res.status(400).json({ message: "Debes confirmar tu contraseña para eliminar la cuenta" });
     }
 
-    const user = await User.findById(req.body.user.userId);
+    const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
@@ -378,7 +376,7 @@ export async function deleteProfile(req: Request, res: Response, next: NextFunct
     }
 
     // Eliminar usuario
-    await User.findByIdAndDelete(req.body.user.userId);
+    await User.findByIdAndDelete(req.user.userId);
 
     res.clearCookie("token"); // cerrar sesión
     res.json({ message: "Perfil eliminado y sesión cerrada" });
