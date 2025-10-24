@@ -8,6 +8,10 @@
     "lint": "eslint --ext .ts src"
   },
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.7.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
@@ -23,10 +27,6 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
     "ts-node-dev": "^2.0.0"
   }
 }
