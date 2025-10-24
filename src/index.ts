@@ -4,16 +4,27 @@ import { connectDB } from './config/database';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
 import movieRoutes from './routes/movies.routes';
+import pexelsRoutes from './routes/pexels.routes';
 const cookieParser = require('cookie-parser');
 
 dotenv.config();
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 
+// Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/pexels', pexelsRoutes);
 
 /**
  * List of allowed origins for CORS
@@ -25,7 +36,10 @@ const allowedOrigins = [
 ];
 
 app.use(
-  cors()
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
 );
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
