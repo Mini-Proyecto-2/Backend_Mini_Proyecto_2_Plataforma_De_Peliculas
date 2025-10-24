@@ -26,11 +26,26 @@ app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/pexels', pexelsRoutes);
 
+/**
+ * List of allowed origins for CORS
+ * @constant {string[]}
+ */
+const allowedOrigins = [
+  "http://localhost",
+  "*",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
-
 /**
  * @description Connect to the database
  * @function
