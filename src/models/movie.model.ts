@@ -1,5 +1,5 @@
 /**
- * @file taskModel.js
+ * @file movie.model.ts
  * @description Definition of the Task schema and model in MongoDB using Mongoose.
  */
 
