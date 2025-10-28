@@ -7,7 +7,9 @@
 const jwt = require("jsonwebtoken");
 import { Request, Response, NextFunction } from "express";
 
-// Extend the Request interface to include the `user` property
+/**
+ * Extends the Express `Request` interface to include an optional `user` property.
+ */
 declare global {
   namespace Express {
     interface Request {
@@ -17,21 +19,27 @@ declare global {
 }
 
 /**
- * Middleware to authenticate the user using a JWT token stored in cookies.
- * 
- * - If the token does not exist, returns a 401 (unauthorized) error.
- * - If the token is invalid or expired, returns a 401 error.
- * - If the token is valid, adds the user data (`req.user`) and continues.
+ * Authentication middleware that verifies the JWT token stored in cookies.
  *
  * @function authMiddleware
- * @param {Object} req - Express request object.
+ * @async
+ * @param {Request} req - Express request object.
  * @param {Object} req.cookies - Cookies sent by the client.
  * @param {string} [req.cookies.token] - Authentication JWT token.
- * @param {Object} res - Express response object.
- * @param {Function} next - Function to pass control to the next middleware.
- * @returns {void} Responds with a 401 error if the token is invalid or continues execution.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Function to pass control to the next middleware.
+ * @returns {void} Sends a 401 Unauthorized response if the token is missing or invalid; otherwise calls `next()`.
+ * @throws {Error} If the JWT verification fails due to expiration or tampering.
+ * @remarks
+ * - Requires `JWT_SECRET` to be defined in environment variables.
+ * - On success, attaches the decoded token payload to `req.user`.
+ * - Designed for use in routes that require authentication.
+ *
+ * @example
+ * app.get('/profile', authMiddleware, (req, res) => {
+ *   res.json({ user: req.user });
+ * });
  */
-
 
 function authMiddleware(req: Request, res: Response, next: NextFunction) {
 

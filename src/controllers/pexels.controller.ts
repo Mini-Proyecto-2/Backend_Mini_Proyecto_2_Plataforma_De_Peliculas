@@ -1,14 +1,26 @@
+/**
+ * @file Pexels API controller.
+ * @description Handles integration with Pexels API to fetch popular videos,
+ * search videos by query, and retrieve specific videos by ID.
+ */
 import { Request, Response } from 'express';
 import { createClient } from "pexels";
 
 const client = createClient(process.env.PEXELS_API_KEY as string);
 
 /**
- * Controller to get popular videos from Pexels API.
+ * Fetches a list of popular videos from the Pexels API.
+ *
  * @function getPopularMovies
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- * @returns {void} Responds with popular videos or a 500 error if the request fails.
+ * @async
+ * @param {Request} _req - Express request object (unused).
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Retrieves up to 10 of the most popular videos from Pexels.
+ * - Requires a valid `PEXELS_API_KEY` environment variable.
+ * - Responds with HTTP 200 and the API response JSON on success.
+ * - Responds with HTTP 500 if the request fails.
  */
 export const getPopularMovies = async (_req: Request, res: Response) => {
   try {
@@ -21,13 +33,20 @@ export const getPopularMovies = async (_req: Request, res: Response) => {
 };
 
 /**
- * Controller to search videos from Pexels API based on a query.
+ * Searches for videos on Pexels based on a query string.
+ *
  * @function getSearchedMovies
- * @param {Object} req - Express request object.
- * @param {Object} req.params - Request parameters.
- * @param {string} req.params.query - Query parameter for searched movies.
- * @param {Object} res - Express response object.
- * @returns {void} Responds with searched videos or a 500 error if the request fails.
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.query - Search term for videos.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Returns up to 10 videos that match the search query.
+ * - Requires a valid `PEXELS_API_KEY` environment variable.
+ * - Responds with HTTP 200 and the Pexels API JSON data on success.
+ * - Responds with HTTP 500 if the request fails.
  */
 export const getSearchedMovies = async (req: Request, res: Response) => {
   try {
@@ -40,13 +59,19 @@ export const getSearchedMovies = async (req: Request, res: Response) => {
 };
 
 /**
- * Controller to get a video by id from Pexels API.
+ * Retrieves a specific video by ID from the Pexels API.
+ *
  * @function getSearchedMovieById
- * @param {Object} req - Express request object.
- * @param {Object} req.params - Request parameters.
- * @param {string} req.params.id - Id parameter for searched movie.
- * @param {Object} res - Express response object.
- * @returns {void} Responds with searched video by id or a 500 error if the request fails.
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Unique identifier for the Pexels video.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Requires a valid `PEXELS_API_KEY` environment variable.
+ * - Responds with HTTP 200 and the video details on success.
+ * - Responds with HTTP 500 if the request fails.
  */
 export const getSearchedMovieById = async (req: Request, res: Response) => {
   try {

@@ -1,6 +1,6 @@
 
 /**
- * @file userModel.js
+ * @file user.model.ts
  * @description Definition of the User schema and model in MongoDB using Mongoose.
  */
 
