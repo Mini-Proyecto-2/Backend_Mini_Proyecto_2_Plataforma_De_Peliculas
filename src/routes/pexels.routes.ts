@@ -28,13 +28,21 @@ const router = Router();
 router.get('/popular', authMiddleware, getPopularMovies);
 
 /**
- * @route GET /pexels/search/:query
- * @description Searches for Pexels videos based on the provided query keyword.
+ * @route GET /pexels/search?query=keyword&per_page=10&page=1
+ * @description Searches for Pexels videos based on query parameter.
  * @access Private (requires JWT authentication)
- * @param {string} query - The search term used to find videos on Pexels.
+ * @param {string} [query=movies] - Search term (optional, defaults to "movies").
+ * @param {number} [per_page=10] - Results per page (1-80, optional).
+ * @param {number} [page=1] - Page number (optional).
+ * @param {string} [orientation=landscape] - Video orientation (optional).
+ * @param {string} [size=small] - Video size (optional).
+ * @param {string} [locale=es-ES] - Locale for results (optional).
  * @returns {Array<Object>} List of videos matching the query.
  * @example
- * GET /pexels/search/nature
+ * GET /pexels/search  (returns 10 videos of "movies")
+ * GET /pexels/search?per_page=5  (returns 5 videos of "movies")
+ * GET /pexels/search?query=nature&per_page=1  (returns 1 video of "nature")
+ * GET /pexels/search?query=pets&per_page=3&page=2  (returns 3 videos of "pets", page 2)
  * Response:
  * {
  *   "videos": [
@@ -42,7 +50,7 @@ router.get('/popular', authMiddleware, getPopularMovies);
  *   ]
  * }
  */
-router.get('/search/:query', authMiddleware, getSearchedMovies);
+router.get('/search', authMiddleware, getSearchedMovies);
 
 /**
  * @route GET /pexels/searchById/:id
