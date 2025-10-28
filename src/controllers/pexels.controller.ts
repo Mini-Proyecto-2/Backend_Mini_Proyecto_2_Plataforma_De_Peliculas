@@ -67,7 +67,7 @@ export const getSearchedMovies = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Query parameter 'query' is required" });
     }
     
-    const data = await client.videos.search({ query: searchQuery, per_page: 10, orientation, size, locale });
+    const data = await client.videos.search({ query: searchQuery, per_page: perPage, orientation, size, locale });
     res.json(data);
   } catch (err) {
     console.error(err);
