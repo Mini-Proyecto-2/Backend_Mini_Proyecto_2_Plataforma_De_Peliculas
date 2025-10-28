@@ -1,20 +1,20 @@
-// api/config/database.js
+// api/config/database.ts
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 /**
- * Establish a connection to the MongoDB database.
+ * Establishes a connection to the MongoDB database.
  *
- * Uses the connection string provided in the environment variable `MONGO_URI`.
+ * Retrieves the connection string from the environment variable `MONGODB_URI`.
  * On success, logs a confirmation message. On failure, logs the error and
- * terminates the process with exit code 1.
+ * terminates the process with exit code `1`.
  *
  * @async
  * @function connectDB
- * @returns {Promise<void>} Resolves when the connection is established.
- * @throws Will terminate the process if the connection fails.
+ * @returns {Promise<void>} Resolves when the connection is successfully established.
+ * @throws {Error} Throws and terminates the process if the connection fails or the URI is not defined.
  */
 export const connectDB = async () => {
   try {
@@ -36,14 +36,14 @@ export const connectDB = async () => {
 };
 
 /**
- * Disconnect from the MongoDB database.
+ * Disconnects from the MongoDB database.
  *
- * Gracefully closes the active connection and logs the result.
- * If an error occurs, it is logged to the console.
+ * Gracefully closes the active Mongoose connection and logs the result.
+ * Logs any error that occurs during disconnection.
  *
  * @async
  * @function disconnectDB
- * @returns {Promise<void>} Resolves when the connection is closed.
+ * @returns {Promise<void>} Resolves when the connection is successfully closed.
  */
 export const disconnectDB = async () => {
   try {

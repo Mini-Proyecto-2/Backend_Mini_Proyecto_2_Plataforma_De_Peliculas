@@ -1,26 +1,45 @@
+/**
+ * @file Movie controller.
+ * @description Handles CRUD operations for movies, including listing, retrieving,
+ * creating, and deleting movies associated with authenticated users.
+ */
+
 import { Request, Response } from 'express';
 import Movie from '../models/movie.model';
 
 /**
- * Lists all movies with user information.
+ * Lists all movies and includes the creator user via `populate('userId')`.
+ *
  * @function listMovies
- * @param {Object} req - Express request object.
- * @param {Object} req.user - Authenticated user.
- * @param {string} req.user._id - User id.
- * @param {Object} res - Express response object.
- * @returns {void} Responds with all movies or a 500 error if the request fails.
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {object} [req.user] - Authenticated user injected by auth middleware.
+ * @param {string} [req.user._id] - Authenticated user's id.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Sorts results by `createdAt` in descending order.
+ * - Responds with HTTP 200 and the movie array on success.
+ * - Intended to return HTTP 500 on unexpected failure (no explicit try/catch here).
  */
 export async function listMovies(req: Request, res: Response) {
   const movies = await Movie.find().populate('userId').sort({ createdAt: -1 });
   res.json(movies);
 }
 /**
- * Gets a movie by id.
+ * Retrieves a single movie by its identifier.
+ *
  * @function getMovie
- * @param {Object} req - Express request object.
- * @param {Object} req.params.id - Movie id.
- * @param {Object} res - Express response object.
- * @returns {void} Responds with the movie or a 404 error if the movie is not found.
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Movie identifier.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Responds with HTTP 200 and the movie document when found.
+ * - Responds with HTTP 404 and `{ msg: 'Not found' }` if the movie does not exist.
+ * - Intended to return HTTP 500 on unexpected failure (no explicit try/catch here).
  */
 export async function getMovie(req: Request, res: Response) {
   const movie = await Movie.findById(req.params.id);
@@ -30,22 +49,29 @@ export async function getMovie(req: Request, res: Response) {
 
 /**
  * Creates a new movie associated with the authenticated user.
+ *
  * @function createMovie
- * @param {Object} req - Express request object.
- * @param {Object} req.body - Movie data.
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {object} req.body - Incoming movie payload.
  * @param {string} req.body.title - Movie title.
- * @param {string} req.body.pexelsId - Movie pexels id.
- * @param {string} req.body.videoUrl - Movie video url.
- * @param {string} req.body.miniatureUrl - Movie miniature url.
- * @param {Object} req.user - Authenticated user.
- * @param {string} req.user._id - User id.
- * @returns {void} Responds with the new movie or a 500 error if the request fails.
+ * @param {string} req.body.pexelsId - Pexels asset identifier for the movie.
+ * @param {string} req.body.videoUrl - Public URL to the movie video.
+ * @param {string} req.body.miniatureUrl - Public URL to the movie thumbnail/miniature.
+ * @param {object} [req.user] - Authenticated user injected by auth middleware.
+ * @param {string} [req.user._id] - Authenticated user's id used as `userId`.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Responds with HTTP 201 and the created movie document on success.
+ * - Responds with HTTP 401 if the request is unauthenticated.
+ * - Responds with HTTP 500 and an error payload on unexpected failure.
  */
 export async function createMovie(req: Request, res: Response) {
   try {
     const { title, pexelsId, videoUrl, miniatureUrl } = req.body;
     
-    // Validar que el usuario esté autenticado
+    // Ensure the user is authenticated
     if (!req.user || !req.user._id) {
       return res.status(401).json({ msg: 'Usuario no autenticado' });
     }
@@ -55,7 +81,7 @@ export async function createMovie(req: Request, res: Response) {
       pexelsId,
       videoUrl, 
       miniatureUrl,
-      userId: req.user._id // Usar userId según el modelo
+      userId: req.user._id // Keep consistent with the model field name
     });
     
     await movie.save();
@@ -66,12 +92,19 @@ export async function createMovie(req: Request, res: Response) {
 }
 
 /**
- * Deletes a movie by id.
+ * Deletes a movie by its identifier.
+ *
  * @function deleteMovie
- * @param {Object} req - Express request object.
- * @param {Object} req.params.id - Movie id.
- * @param {Object} res - Express response object.
- * @returns {void} Responds with a 204 status if the movie is deleted or a 500 error if the request fails.
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Movie identifier.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Responds with HTTP 204 (no content) when the movie is deleted.
+ * - Responds with HTTP 404 if the movie does not exist.
+ * - Responds with HTTP 500 and an error payload on unexpected failure.
  */
 
 export async function deleteMovie(req: Request, res: Response) {
