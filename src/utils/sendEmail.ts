@@ -1,5 +1,5 @@
 /**
- * @file utils/sendEmail.js
+ * @file utils/sendEmail.ts
  * @description Utility to send emails using Nodemailer.
  */
 

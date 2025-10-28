@@ -17,20 +17,23 @@ let loginAttempts: { [key: string]: { count: number; lockedUntil: number | null 
 
 /**
  * Registers a new user in the database.
+ *
  * @function signup
  * @async
- * @param {Object} req - Express request object.
- * @param {Object} req.body - User data.
+ * @param {Request} req - Express request object.
  * @param {string} req.body.firstName - First name.
  * @param {string} req.body.lastName - Last name.
  * @param {number} req.body.age - Age.
  * @param {string} req.body.email - Email address.
  * @param {string} req.body.password - Plain (unencrypted) password.
- * @param {Object} res - Express response object.
- * @param {Function} next - Error handling middleware.
- * @returns {JSON} Registration confirmation with `userId`.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Validates required fields.
+ * - Enforces password complexity (≥ 8 chars, at least one uppercase, one lowercase and one special character).
+ * - Responds with HTTP 201 and `{ userId }` on success.
  */
-
 
 export async function signup(req: Request, res: Response, next: NextFunction) {
   try {
@@ -42,7 +45,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
         .json({ message: "Todos los campos son requeridos" });
     }
 
-    // Validación de la contraseña ANTES del hash
+    // Validate password BEFORE hashing
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
@@ -82,16 +85,21 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
 };
 
 /**
- * Logs in a user and generates a JWT stored in a cookie.
+ * Logs in a user and issues a JWT stored in an HTTP-only cookie.
+ *
  * @function login
  * @async
- * @param {Object} req - Express request object.
- * @param {Object} req.body - User credentials.
+ * @param {Request} req - Express request object.
  * @param {string} req.body.email - Email address.
  * @param {string} req.body.password - Password.
- * @param {Object} res - Express response object.
- * @param {Function} next - Error handling middleware.
- * @returns {JSON} Success message and `userId`.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Requires `process.env.JWT_SECRET`.
+ * - Locks the account for 15 minutes after 5 failed attempts (per email).
+ * - Sets cookie `token` with `httpOnly`, and `secure/sameSite` based on `NODE_ENV`.
+ * - Responds with HTTP 200 and `{ userId }` on success.
  */
 
 
@@ -130,12 +138,12 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     if (!isPasswordValid) {
       loginAttempts[email].count++;
       if (loginAttempts[email].count >= 5) {
-        loginAttempts[email].lockedUntil = Date.now() + 15 * 60 * 1000; // Bloquea por 15 minutos
+        loginAttempts[email].lockedUntil = Date.now() + 15 * 60 * 1000; // Lock for 15 minutes
       }
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    loginAttempts[email].count = 0; // Resetea el contador después de bloquear
+    loginAttempts[email].count = 0; // Reset counter after a successful login
 
     const token = jwt.sign(
       { userId: user._id, email: user.email },
@@ -145,9 +153,9 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Usa 'secure' solo en producción
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Ajusta según tus necesidades (Lax, Strict, None)
-      maxAge: 2 * 60 * 60 * 1000, // 2 horas
+      secure: process.env.NODE_ENV === "production", // Use 'secure' only in production
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Adjust according to your needs (Lax, Strict, None)
+      maxAge: 2 * 60 * 60 * 1000, // 2 hours
     });
 
     res.status(200).json({ message: "Login exitoso", userId: user._id });
@@ -157,12 +165,16 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 };
 
 /**
- * Logs out the user by clearing the authentication token cookie.
+ * Logs out the user by clearing the authentication cookie.
+ *
  * @function logout
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- * @param {Function} next - Error handling middleware.
- * @returns {JSON} Logout confirmation.
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Clears the `token` cookie using `httpOnly`, and `secure/sameSite` based on `NODE_ENV`.
  */
 
 
@@ -180,15 +192,18 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
 };
 
 /**
- * Sends an email with a link to reset the user's password.
+ * Sends a password reset email with a one-time link.
+ *
  * @function forgotPassword
  * @async
- * @param {Object} req - Express request object.
- * @param {Object} req.body - Request data.
- * @param {string} req.body.email - User's email address.
- * @param {Object} res - Express response object.
- * @param {Function} next - Error handling middleware.
- * @returns {JSON} Confirmation of the email being sent.
+ * @param {Request} req - Express request object.
+ * @param {string} req.body.email - User email address.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Requires `process.env.FRONTEND_URL` to build the reset link.
+ * - Persists `resetPasswordToken` and `resetPasswordExpires` (1 hour).
  */
 
 
@@ -201,18 +216,18 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    // Generar token único
+    // Generate unique token
     const resetToken = cryptoModule.randomBytes(32).toString("hex");
 
-    // Guardar en DB con expiración
+    // Store in DB with expiration
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
     await user.save();
 
-    // URL de recuperación
+    // Recovery URL
     const resetURL = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
 
-    // Contenido del correo
+    // Email content
     const message = `
       <h2>Restablecer contraseña</h2>
       <p>Haz click en el siguiente enlace para restablecer tu contraseña:</p>
@@ -233,17 +248,20 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
 };
 
 /**
- * Resets the user's password using a valid token.
+ * Resets the user's password using a valid, non-expired token.
+ *
  * @function resetPassword
  * @async
- * @param {Object} req - Express request object.
+ * @param {Request} req - Express request object.
  * @param {Object} req.params - Route parameters.
  * @param {string} req.params.token - Reset token.
- * @param {Object} req.body - New password data.
- * @param {string} req.body.password - New password.
- * @param {Object} res - Express response object.
- * @param {Function} next - Error-handling middleware.
- * @returns {JSON} Confirmation of password update.
+ * @param {Object} req.body - Body payload.
+ * @param {string} req.body.password - New password to set.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Hashes the new password and clears `resetPasswordToken` and `resetPasswordExpires`.
  */
 
 export async function resetPassword(req: Request, res: Response, next: NextFunction) {
@@ -254,17 +272,17 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
 
     const user = await User.findOne({
       resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }, // válido y no expirado
+      resetPasswordExpires: { $gt: Date.now() }, // valid and not expired
     });
 
     if (!user) {
       return res.status(400).json({ message: "Token inválido o expirado" });
     }
 
-    // Hashear nueva contraseña
+    // Hash the new password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Actualizar usuario
+    // Update user
     user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
@@ -278,14 +296,16 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
 
 /**
  * Retrieves the authenticated user's profile.
+ *
  * @function getProfile
  * @async
- * @param {Object} req - Express request object.
- * @param {Object} req.user - Authenticated user (from the token).
- * @param {string} req.user.userId - User ID.
- * @param {Object} res - Express response object.
- * @param {Function} next - Error-handling middleware.
- * @returns {JSON} User information without sensitive data.
+ * @param {Request} req - Express request object (expects `req.user.userId` injected by auth middleware).
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Omits sensitive fields: `password`, `resetPasswordToken`, `resetPasswordExpires`.
+ * - Responds with HTTP 404 if the user is not found, 401 if unauthenticated.
  */
 
 export async function getProfile(req: Request, res: Response, next: NextFunction) {
@@ -305,17 +325,20 @@ export async function getProfile(req: Request, res: Response, next: NextFunction
 
 /**
  * Updates the authenticated user's profile.
+ *
  * @function updateProfile
  * @async
- * @param {Object} req - Express request object.
- * @param {Object} req.body - Data to update.
+ * @param {Request} req - Express request object (expects `req.user.userId`).
  * @param {string} req.body.firstName - First name.
  * @param {string} req.body.lastName - Last name.
  * @param {number} req.body.age - Age.
  * @param {string} req.body.email - Email address.
- * @param {Object} res - Express response object.
- * @param {Function} next - Error-handling middleware.
- * @returns {JSON} Updated user.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Uses the ID from the JWT (not from the body) to update the user.
+ * - Returns the updated user without sensitive fields.
  */
 
 export async function updateProfile(req: Request, res: Response, next: NextFunction) {
@@ -344,15 +367,17 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
 };
 
 /**
- * Deletes the authenticated user's profile after password confirmation.
+ * Deletes the authenticated user's account after confirming the current password.
+ *
  * @function deleteProfile
  * @async
- * @param {Object} req - Express request object.
- * @param {Object} req.body - Confirmation data.
- * @param {string} req.body.password - User's current password.
- * @param {Object} res - Express response object.
- * @param {Function} next - Error-handling middleware.
- * @returns {JSON} Confirmation of profile deletion and logout.
+ * @param {Request} req - Express request object (expects `req.user.userId`).
+ * @param {string} req.body.password - Current password for confirmation.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Verifies the provided password, deletes the user, and clears the `token` cookie.
  */
 
 
@@ -369,16 +394,16 @@ export async function deleteProfile(req: Request, res: Response, next: NextFunct
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    // Validar contraseña
+    // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
-    // Eliminar usuario
+    // Delete user
     await User.findByIdAndDelete(req.user.userId);
 
-    res.clearCookie("token"); // cerrar sesión
+    res.clearCookie("token"); // end session
     res.json({ message: "Perfil eliminado y sesión cerrada" });
   } catch (error) {
     next(error);
@@ -386,14 +411,18 @@ export async function deleteProfile(req: Request, res: Response, next: NextFunct
 };
 
 /**
- * Checks if there is an active session using the JWT.
+ * Checks if a session is active by validating the JWT stored in cookies.
+ *
  * @function session
  * @async
- * @param {Object} req - Express request object.
- * @param {Object} req.cookies - Request cookies.
+ * @param {Request} req - Express request object.
+ * @param {Object} req.cookies - Parsed cookies object.
  * @param {string} [req.cookies.token] - Session JWT.
- * @param {Object} res - Express response object.
- * @returns {JSON} Session status (`loggedIn: true/false`) and user data if authenticated.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Requires `process.env.JWT_SECRET`.
+ * - Returns `{ loggedIn: true, user }` when valid, otherwise `{ loggedIn: false }` with HTTP 401.
  */
 
 
