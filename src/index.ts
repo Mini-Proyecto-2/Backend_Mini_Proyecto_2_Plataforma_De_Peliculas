@@ -9,8 +9,10 @@ import cors from 'cors';
 import { connectDB } from './config/database';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
-import movieRoutes from './routes/movies.routes';
+import movieRoutes from './routes/movie.routes';
 import pexelsRoutes from './routes/pexels.routes';
+import commentsRoutes from './routes/comment.routes';
+import ratingRoutes from './routes/rating.routes';
 const cookieParser = require('cookie-parser');
 
 dotenv.config();
@@ -49,6 +51,8 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/pexels', pexelsRoutes);
+app.use('/api/comments', commentsRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 /**
  * Health check endpoint.
