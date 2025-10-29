@@ -26,7 +26,7 @@ const router = Router();
  *   }
  * ]
  */
-router.get('/', listMovies);
+router.get('/', authMiddleware, listMovies);
 
 /**
  * @route GET /movies/:id
@@ -44,7 +44,7 @@ router.get('/', listMovies);
  *   "miniatureUrl": "https://..."
  * }
  */
-router.get('/:id', getMovie);
+router.get('/:id', authMiddleware, getMovie);
 
 /**
  * @route POST /movies
@@ -66,7 +66,7 @@ router.get('/:id', getMovie);
  *   "userId": "6721a9c4..."
  * }
  */
-router.post('/', createMovie);
+router.post('/', authMiddleware, createMovie);
 
 /**
  * @route DELETE /movies/:id
@@ -78,6 +78,6 @@ router.post('/', createMovie);
  * DELETE /movies/673d4a12
  * Response: 204 No Content
  */
-router.delete('/:id', deleteMovie);
+router.delete('/:id', authMiddleware, deleteMovie);
 
 export default router;

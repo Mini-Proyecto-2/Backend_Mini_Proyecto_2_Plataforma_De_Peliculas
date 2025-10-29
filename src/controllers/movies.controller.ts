@@ -23,8 +23,17 @@ import Movie from '../models/movie.model';
  * - Intended to return HTTP 500 on unexpected failure (no explicit try/catch here).
  */
 export async function listMovies(req: Request, res: Response) {
-  const movies = await Movie.find().populate('userId').sort({ createdAt: -1 });
-  res.json(movies);
+try {
+    const userId = req.user.userId; 
+    const movies = await Movie.find({ userId })
+      .populate("userId", "firstName lastName email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(movies);
+  } catch (error) {
+    console.error("Error al listar películas:", error);
+    res.status(500).json({ message: "Error al obtener las películas" });
+  }
 }
 /**
  * Retrieves a single movie by its identifier.
