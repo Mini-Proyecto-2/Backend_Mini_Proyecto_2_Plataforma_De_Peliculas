@@ -13,8 +13,8 @@ import Comment from "../models/comment.model";
 export const createComment = async (req: Request, res: Response) => {
   try {
     const { description, moviePexelsId } = req.body;
-    if (!req.user || !req.user._id) {
-      return res.status(401).json({ msg: 'Usuario no autenticado' });
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
     }
 
     if (!description || !moviePexelsId) {
@@ -24,7 +24,7 @@ export const createComment = async (req: Request, res: Response) => {
     const newComment = await Comment.create({
       description,
       moviePexelsId,
-      userId: req.user._id
+      userId: req.user.userId
     });
 
     res.status(201).json(newComment);
@@ -77,9 +77,8 @@ export const getCommentsByUser = async (req: Request, res: Response) => {
 export const deleteComment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id || req.body.userId; // depends on your auth setup
-    if (!req.user || !req.user._id) {
-      return res.status(401).json({ msg: 'Usuario no autenticado' });
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
     }
 
     const comment = await Comment.findById(id);
@@ -87,7 +86,7 @@ export const deleteComment = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    if (comment.userId.toString() !== userId) {
+    if (comment.userId.toString() !== req.user.userId) {
       return res.status(403).json({ message: "Unauthorized to delete this comment" });
     }
 

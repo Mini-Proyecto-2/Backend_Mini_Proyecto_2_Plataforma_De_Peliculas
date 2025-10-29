@@ -13,7 +13,10 @@ import Rating from "../models/rating.model";
 export const createOrUpdateRating = async (req: Request, res: Response) => {
   try {
     const { value, moviePexelsId } = req.body;
-    const userId = req.user?.id || req.body.userId; // depends on auth middleware
+    const userId = req.user.userId; // depends on auth middleware
+    if(!req.user || !req.user.userId) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
 
     if (!value || !moviePexelsId) {
       return res.status(400).json({ message: "value and moviePexelsId are required" });
@@ -48,7 +51,7 @@ export const createOrUpdateRating = async (req: Request, res: Response) => {
 export const getAverageRatingByMovie = async (req: Request, res: Response) => {
   try {
     const { moviePexelsId } = req.params;
-
+    console.log("cagadita: ", moviePexelsId);
     const ratings = await Rating.aggregate([
       { $match: { moviePexelsId } },
       {

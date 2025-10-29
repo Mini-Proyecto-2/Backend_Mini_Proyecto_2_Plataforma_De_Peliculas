@@ -5,12 +5,13 @@ import {
   getCommentsByUser,
   deleteComment,
 } from "../controllers/comment.controller";
+const authMiddleware = require("../middleware/auth");
 
 const router = Router();
 
-router.post("/", createComment);
+router.post("/", authMiddleware, createComment);
 router.get("/:moviePexelsId", getCommentsByMovie);
 router.get("/:userId", getCommentsByUser);
-router.delete("/:id", deleteComment);
+router.delete("/:id", authMiddleware, deleteComment);
 
 export default router;

@@ -5,12 +5,13 @@ import {
   getRatingsByUser,
   deleteRating,
 } from "../controllers/rating.controller";
+const authMiddleware = require("../middleware/auth");
 
 const router = Router();
 
-router.post("/", createOrUpdateRating);
-router.get("/:moviePexelsId", getAverageRatingByMovie);
-router.get("/:userId", getRatingsByUser);
-router.delete("/:id", deleteRating);
+router.post("/", authMiddleware, createOrUpdateRating);
+router.get("/:moviePexelsId", authMiddleware, getAverageRatingByMovie);
+router.get("/:userId", authMiddleware, getRatingsByUser);
+router.delete("/:id", authMiddleware, deleteRating);
 
 export default router;
