@@ -51,7 +51,6 @@ export const createOrUpdateRating = async (req: Request, res: Response) => {
 export const getAverageRatingByMovie = async (req: Request, res: Response) => {
   try {
     const { moviePexelsId } = req.params;
-    console.log("cagadita: ", moviePexelsId);
     const ratings = await Rating.aggregate([
       { $match: { moviePexelsId } },
       {
