@@ -6,6 +6,7 @@
 
 import { Router } from 'express';
 import { listMovies, getMovie, createMovie, deleteMovie } from '../controllers/movies.controller';
+const authMiddleware = require("../middleware/auth");
 const router = Router();
 
 /**
