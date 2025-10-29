@@ -98,3 +98,31 @@ export const deleteComment = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error deleting comment" });
   }
 };
+
+export const updateComment = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { description } = req.body;
+
+        if (!req.user || !req.user.userId) {
+            return res.status(401).json({ message: 'Usuario no autenticado' });
+        }
+
+        const comment = await Comment.findById(id);
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        if (comment.userId.toString() !== req.user.userId) {
+            return res.status(403).json({ message: "Unauthorized to update this comment" });
+        }
+
+        comment.description = description;
+        await comment.save();
+
+        res.status(200).json({ message: "Comment updated successfully", comment });
+    } catch (error) {
+        console.error("Error updating comment:", error);
+        res.status(500).json({ message: "Server error updating comment" });
+    }
+}

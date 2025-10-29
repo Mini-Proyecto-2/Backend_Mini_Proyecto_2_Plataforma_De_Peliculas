@@ -10,8 +10,8 @@ const authMiddleware = require("../middleware/auth");
 const router = Router();
 
 router.post("/", authMiddleware, createOrUpdateRating);
-router.get("/:moviePexelsId", authMiddleware, getAverageRatingByMovie);
-router.get("/:userId", authMiddleware, getRatingsByUser);
+router.get("/movie/:moviePexelsId", authMiddleware, getAverageRatingByMovie);
+router.get("/user/:userId", authMiddleware, getRatingsByUser);
 router.delete("/:id", authMiddleware, deleteRating);
 
 export default router;

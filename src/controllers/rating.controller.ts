@@ -97,7 +97,7 @@ export const getRatingsByUser = async (req: Request, res: Response) => {
 export const deleteRating = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id || req.body.userId;
+    const userId = req.user.userId;
 
     const rating = await Rating.findById(id);
     if (!rating) {
