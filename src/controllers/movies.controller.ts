@@ -14,7 +14,7 @@ import Movie from '../models/movie.model';
  * @async
  * @param {Request} req - Express request object.
  * @param {object} [req.user] - Authenticated user injected by auth middleware.
- * @param {string} [req.user._id] - Authenticated user's id.
+ * @param {string} [req.user.userId] - Authenticated user's id.
  * @param {Response} res - Express response object.
  * @returns {Promise<void>} Resolves after sending the HTTP response.
  * @remarks
@@ -76,7 +76,7 @@ export async function getMovie(req: Request, res: Response) {
  * @param {string} req.body.pexelsId - Pexels video ID.
  * @param {string} req.body.miniatureUrl - Movie thumbnail URL.
  * @param {object} [req.user] - Authenticated user injected by auth middleware.
- * @param {string} [req.user._id] - Authenticated user's id used as `userId`.
+ * @param {string} [req.user.userId] - Authenticated user's id used as `userId`.
  * @param {Response} res - Express response object.
  * @returns {Promise<void>} Resolves after sending the HTTP response.
  * @remarks
@@ -98,7 +98,7 @@ export async function createMovie(req: Request, res: Response) {
     }
     
     // Ensure the user is authenticated
-    if (!req.user || !req.user._id) {
+    if (!req.user || !req.user.userId) {
       return res.status(401).json({ msg: 'Usuario no autenticado' });
     }
     
@@ -107,7 +107,7 @@ export async function createMovie(req: Request, res: Response) {
       pexelUser,
       pexelsId,
       miniatureUrl,
-      userId: req.user._id
+      userId: req.user.userId
     });
     
     await movie.save();
