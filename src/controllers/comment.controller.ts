@@ -43,10 +43,12 @@ export const getCommentsByMovie = async (req: Request, res: Response) => {
     const { moviePexelsId } = req.params;
 
     const comments = await Comment.find({ moviePexelsId })
-      .populate("userId", "username email") // populate user info
+      .populate("userId", "_id firstName lastName email") // populate user info
       .sort({ createdAt: -1 });
 
-    res.status(200).json(comments);
+    const userComments = comments.filter((comment: any) => comment.userId._id.toString() === req.user.userId); // filter out comments with deleted users
+    const otherComments = comments.filter((comment: any) => comment.userId._id.toString() !== req.user.userId); // filter out comments with deleted users
+    res.status(200).json({ userComments, otherComments });
   } catch (error) {
     console.error("Error fetching comments:", error);
     res.status(500).json({ message: "Server error fetching comments" });
