@@ -92,7 +92,7 @@ router.get("/user/:userId", authMiddleware, getCommentsByUser);
 router.delete("/:id", authMiddleware, deleteComment);
 
 /**
- * @route PATCH /comments/:id
+ * @route PUT /comments/:id
  * @description Updates a comment's description (only the comment owner can update).
  * @access Private (requires JWT authentication)
  * @param {string} id - Comment identifier.
@@ -109,6 +109,6 @@ router.delete("/:id", authMiddleware, deleteComment);
  *   "comment": { "_id": "...", "description": "Updated comment text", ... }
  * }
  */
-router.patch("/:id", authMiddleware, updateComment);
+router.put("/:id", authMiddleware, updateComment);
 
 export default router;
