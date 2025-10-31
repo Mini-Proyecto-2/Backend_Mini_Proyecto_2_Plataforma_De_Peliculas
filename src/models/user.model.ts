@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true, // no se permiten correos repetidos
+    unique: true, // duplicate emails are not allowed
     match: [/^\S+@\S+\.\S+$/, "El email no es válido"]
   },
   password: {
@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema({
     minlength: [8, "La contraseña debe tener al menos 8 caracteres"],
     validate: {
       validator: function (value: string) {
-        // Debe contener al menos: 1 minúscula, 1 mayúscula, 1 número y 1 caracter especial
+        // Must contain at least: 1 lowercase, 1 uppercase, 1 number, and 1 special character
         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(value);
       },
       message:
