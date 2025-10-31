@@ -52,7 +52,7 @@ try {
  */
 export async function getMovie(req: Request, res: Response) {
   try {
-    const movie = await Movie.findOne({ pexelsId: req.params.id });
+    const movie = await Movie.findOne({ pexelsId: req.params.id, userId: req.user.userId });
     
     if (!movie) {
       return res.status(200).json({ exists: false });
@@ -135,9 +135,16 @@ export async function createMovie(req: Request, res: Response) {
 
 export async function deleteMovie(req: Request, res: Response) {
   try {
-    const movie = await Movie.findByIdAndDelete(req.params.id);
-    if (!movie) return res.status(404).json({ msg: 'Película no encontrada' });
-    res.status(204).end();
+    const movie = await Movie.findOneAndDelete({ 
+      pexelsId: req.params.id, 
+      userId: req.user.userId 
+    });
+    
+    if (!movie) {
+      return res.status(404).json({ msg: 'Película no encontrada o no tienes permiso para eliminarla' });
+    }
+    
+    res.status(200).json({ msg: 'Película eliminada exitosamente', movie });
   } catch (error) {
     res.status(500).json({ msg: 'Error al eliminar la película', error });
   }
