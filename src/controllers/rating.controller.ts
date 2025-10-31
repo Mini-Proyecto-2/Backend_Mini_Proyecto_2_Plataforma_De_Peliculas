@@ -65,7 +65,7 @@ export const getAverageRatingByMovie = async (req: Request, res: Response) => {
     ]);
 
     if (ratings.length === 0) {
-      return res.status(200).json({ averageRating: 0, totalRatings: 0 });
+      return res.status(200).json({ averageRating: 0, totalRatings: 0, userRating: 0 });
     }
 
     const userRating = await Rating.findOne({ userId, moviePexelsId });
