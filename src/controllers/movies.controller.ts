@@ -52,7 +52,7 @@ try {
  */
 export async function getMovie(req: Request, res: Response) {
   try {
-    const movie = await Movie.findOne({ pexelsId: req.params.id });
+    const movie = await Movie.findOne({ pexelsId: req.params.id, userId: req.user.userId });
     
     if (!movie) {
       return res.status(200).json({ exists: false });
