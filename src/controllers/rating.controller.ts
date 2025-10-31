@@ -7,8 +7,32 @@ import { Request, Response } from "express";
 import Rating from "../models/rating.model";
 
 /**
- * Create or update a rating for a movie
+ * Creates a new rating or updates an existing rating for a movie.
+ *
+ * @function createOrUpdateRating
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {Object} req.body - Request body.
+ * @param {number} req.body.value - Rating value between 1 and 5 (required).
+ * @param {string} req.body.moviePexelsId - Pexels movie ID to rate (required).
+ * @param {Object} req.user - Authenticated user injected by auth middleware.
+ * @param {string} req.user.userId - Authenticated user's ID.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - If user already rated the movie, updates the existing rating.
+ * - Otherwise, creates a new rating.
+ * - Requires authentication via JWT middleware.
+ * - Responds with HTTP 201 for new rating or HTTP 200 for updated rating.
+ * - Responds with HTTP 400 if required fields are missing or value is out of range (1-5).
+ * - Responds with HTTP 401 if user is not authenticated.
+ * - Responds with HTTP 500 on server error.
+ * @example
  * POST /api/ratings
+ * {
+ *   "value": 5,
+ *   "moviePexelsId": "3190131"
+ * }
  */
 export const createOrUpdateRating = async (req: Request, res: Response) => {
   try {
@@ -45,8 +69,31 @@ export const createOrUpdateRating = async (req: Request, res: Response) => {
 };
 
 /**
- * Get average rating for a specific movie
- * GET /api/ratings/movie/:moviePexelsId
+ * Retrieves the average rating, total ratings count, and the authenticated user's rating for a specific movie.
+ *
+ * @function getAverageRatingByMovie
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {Object} req.params - Route parameters.
+ * @param {string} req.params.moviePexelsId - Pexels movie ID.
+ * @param {Object} req.user - Authenticated user injected by auth middleware.
+ * @param {string} req.user.userId - Authenticated user's ID.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Uses MongoDB aggregation to calculate average rating and total count.
+ * - Also fetches the authenticated user's rating for this movie.
+ * - Responds with HTTP 200 and rating statistics on success.
+ * - Returns zero values if the movie has no ratings.
+ * - Responds with HTTP 500 on server error.
+ * @example
+ * GET /api/ratings/movie/3190131
+ * Response:
+ * {
+ *   "averageRating": 4.5,
+ *   "totalRatings": 10,
+ *   "userRating": 5
+ * }
  */
 export const getAverageRatingByMovie = async (req: Request, res: Response) => {
   try {
@@ -79,8 +126,30 @@ export const getAverageRatingByMovie = async (req: Request, res: Response) => {
 };
 
 /**
- * Get all ratings made by a specific user
- * GET /api/ratings/user/:userId
+ * Retrieves all ratings made by a specific user.
+ *
+ * @function getRatingsByUser
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {Object} req.params - Route parameters.
+ * @param {string} req.params.userId - User identifier.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Sorts ratings by ID in descending order (most recent first).
+ * - Responds with HTTP 200 and the rating array on success.
+ * - Responds with HTTP 500 on server error.
+ * @example
+ * GET /api/ratings/user/6721a9c4...
+ * Response:
+ * [
+ *   {
+ *     "_id": "673d6a12...",
+ *     "value": 5,
+ *     "moviePexelsId": "3190131",
+ *     "userId": "6721a9c4..."
+ *   }
+ * ]
  */
 export const getRatingsByUser = async (req: Request, res: Response) => {
   try {
@@ -95,8 +164,29 @@ export const getRatingsByUser = async (req: Request, res: Response) => {
 };
 
 /**
- * Delete a rating (only owner or admin)
- * DELETE /api/ratings/:id
+ * Deletes a rating (only the rating owner can delete).
+ *
+ * @function deleteRating
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {Object} req.params - Route parameters.
+ * @param {string} req.params.id - Rating identifier.
+ * @param {Object} req.user - Authenticated user injected by auth middleware.
+ * @param {string} req.user.userId - Authenticated user's ID.
+ * @param {Response} res - Express response object.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Verifies that the authenticated user is the owner of the rating.
+ * - Responds with HTTP 200 and a success message when deleted.
+ * - Responds with HTTP 403 if user is not the rating owner.
+ * - Responds with HTTP 404 if rating is not found.
+ * - Responds with HTTP 500 on server error.
+ * @example
+ * DELETE /api/ratings/673d6a12...
+ * Response:
+ * {
+ *   "message": "Rating deleted successfully"
+ * }
  */
 export const deleteRating = async (req: Request, res: Response) => {
   try {

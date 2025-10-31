@@ -221,7 +221,7 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
 
     // Store in DB with expiration
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
     // Recovery URL
@@ -345,13 +345,13 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
   try {
     const { firstName, lastName, age, email } = req.body;
 
-    // Validaciones
+    // Validations
     if (!firstName || !lastName || !age || !email) {
       return res.status(400).json({ message: "Todos los campos son requeridos" });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.user.userId, // ⚡ siempre usa el id del token, no del body
+      req.user.userId, // always use the id from the token, not from the body
       { firstName, lastName, age, email },
       { new: true, runValidators: true, context: "query" }
     ).select("-password -resetPasswordToken -resetPasswordExpires");

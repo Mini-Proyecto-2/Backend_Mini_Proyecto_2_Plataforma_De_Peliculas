@@ -51,14 +51,14 @@ export const getPopularMovies = async (_req: Request, res: Response) => {
  */
 export const getSearchedMovies = async (req: Request, res: Response) => {
   try {
-    const searchQuery = (req.query.query as string) || "movies"; // Opcional, default vacío
+    const searchQuery = (req.query.query as string) || "movies"; // Optional, default empty
     const perPage = parseInt(req.query.per_page as string) || 10; // Default: 10
     const page = parseInt(req.query.page as string) || 1; // Default: 1
     const orientation = (req.query.orientation as string) || "landscape";
     const size = (req.query.size as string) || "small";
     const locale = (req.query.locale as string) || "es-ES";
-    
-    // Validar per_page (Pexels permite 1-80)
+
+    // Validate per_page (Pexels allows 1-80)
     if (perPage < 1 || perPage > 80) {
       return res.status(400).json({ error: "per_page must be between 1 and 80" });
     }
