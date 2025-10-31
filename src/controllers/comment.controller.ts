@@ -43,7 +43,7 @@ export const getCommentsByMovie = async (req: Request, res: Response) => {
     const { moviePexelsId } = req.params;
 
     const comments = await Comment.find({ moviePexelsId })
-      .populate("userId", "username email") // populate user info
+      .populate("userId", "firstName lastName email") // populate user info
       .sort({ createdAt: -1 });
 
     res.status(200).json(comments);
