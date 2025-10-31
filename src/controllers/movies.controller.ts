@@ -14,7 +14,7 @@ import Movie from '../models/movie.model';
  * @async
  * @param {Request} req - Express request object.
  * @param {object} [req.user] - Authenticated user injected by auth middleware.
- * @param {string} [req.user._id] - Authenticated user's id.
+ * @param {string} [req.user.userId] - Authenticated user's id.
  * @param {Response} res - Express response object.
  * @returns {Promise<void>} Resolves after sending the HTTP response.
  * @remarks
@@ -51,9 +51,17 @@ try {
  * - Intended to return HTTP 500 on unexpected failure (no explicit try/catch here).
  */
 export async function getMovie(req: Request, res: Response) {
-  const movie = await Movie.findById(req.params.id);
-  if (!movie) return res.status(404).json({ msg: 'Not found' });
-  res.json(movie);
+  try {
+    const movie = await Movie.findOne({ pexelsId: req.params.id });
+    
+    if (!movie) {
+      return res.status(200).json({ exists: false });
+    }
+    
+    res.status(200).json({ exists: true, movie });
+  } catch (error) {
+    res.status(500).json({ exists: false, msg: 'Error al buscar la película' });
+  }
 }
 
 /**
@@ -64,33 +72,42 @@ export async function getMovie(req: Request, res: Response) {
  * @param {Request} req - Express request object.
  * @param {object} req.body - Incoming movie payload.
  * @param {string} req.body.title - Movie title.
- * @param {string} req.body.pexelsId - Pexels asset identifier for the movie.
- * @param {string} req.body.videoUrl - Public URL to the movie video.
- * @param {string} req.body.miniatureUrl - Public URL to the movie thumbnail/miniature.
+ * @param {string} req.body.pexelUser - Pexels user/author name.
+ * @param {string} req.body.pexelsId - Pexels video ID.
+ * @param {string} req.body.miniatureUrl - Movie thumbnail URL.
  * @param {object} [req.user] - Authenticated user injected by auth middleware.
- * @param {string} [req.user._id] - Authenticated user's id used as `userId`.
+ * @param {string} [req.user.userId] - Authenticated user's id used as `userId`.
  * @param {Response} res - Express response object.
  * @returns {Promise<void>} Resolves after sending the HTTP response.
  * @remarks
  * - Responds with HTTP 201 and the created movie document on success.
+ * - Responds with HTTP 400 if required fields are missing.
  * - Responds with HTTP 401 if the request is unauthenticated.
  * - Responds with HTTP 500 and an error payload on unexpected failure.
  */
 export async function createMovie(req: Request, res: Response) {
   try {
-    const { title, pexelsId, videoUrl, miniatureUrl } = req.body;
+    const { title, pexelUser, pexelsId, miniatureUrl } = req.body;
+    
+    // Validate required fields
+    if (!title || !pexelUser || !pexelsId || !miniatureUrl) {
+      return res.status(400).json({ 
+        msg: 'Todos los campos son requeridos',
+        required: ['title', 'pexelUser', 'pexelsId', 'miniatureUrl']
+      });
+    }
     
     // Ensure the user is authenticated
-    if (!req.user || !req.user._id) {
+    if (!req.user || !req.user.userId) {
       return res.status(401).json({ msg: 'Usuario no autenticado' });
     }
     
     const movie = new Movie({ 
       title, 
+      pexelUser,
       pexelsId,
-      videoUrl, 
       miniatureUrl,
-      userId: req.user._id // Keep consistent with the model field name
+      userId: req.user.userId
     });
     
     await movie.save();
