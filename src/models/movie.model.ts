@@ -13,33 +13,30 @@ const mongoose = require("mongoose");
  * Includes pexels data, video information, and user reference.
  *
  * @typedef {Object} Movie
- * @property {string} pexelsId - Movie id (pexels id, required).
- * @property {string} title - Movie title (required, maximum 100 characters).
- * @property {string} videoUrl - Movie video url (required).
- * @property {Date} createdAt - Movie creation date (automatic).
- * @property {String} miniatureUrl - Movie miniature url (required).
+ * @property {string} title - Movie title (required).
+ * @property {string} pexelUser - Pexels user/author name (required).
+ * @property {string} pexelsId - Pexels video ID (required).
+ * @property {string} miniatureUrl - Movie miniature/thumbnail url (required).
  * @property {mongoose.Types.ObjectId} userId - Reference to the user who added this movie.
+ * @property {Date} createdAt - Movie creation date (automatic).
  */
 
 
 const movieSchema = new mongoose.Schema({
-  pexelsId: {
-    type: String,
-    required: true,
-    trim: true
-  },
   title: {
     type: String,
     required: true,
     trim: true
   },
-  videoUrl: {
+  pexelUser: {
     type: String,
     required: true,
+    trim: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  pexelsId: {
+    type: String,
+    required: true,
+    trim: true
   },
   miniatureUrl: {
     type: String,
@@ -49,6 +46,10 @@ const movieSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Referencia al modelo User
     required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
 });
 

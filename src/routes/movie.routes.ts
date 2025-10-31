@@ -51,20 +51,27 @@ router.get('/:id', authMiddleware, getMovie);
  * @route POST /movies
  * @description Creates a new movie associated with the authenticated user.
  * @access Private (requires JWT authentication)
+ * @param {string} title - Movie title (required).
+ * @param {string} pexelUser - Pexels user/author name (required).
+ * @param {string} pexelsId - Pexels video ID (required).
+ * @param {string} miniatureUrl - Movie thumbnail URL (required).
  * @example
  * POST /movies
  * {
- *   "title": "New Movie",
- *   "pexelsId": "123456",
- *   "videoUrl": "https://...",
- *   "miniatureUrl": "https://..."
+ *   "title": "A Modern Video Camera Recorder Mounted On A Camera Stand",
+ *   "pexelUser": "Chris Gonzalez",
+ *   "pexelsId": "3190131",
+ *   "miniatureUrl": "https://images.pexels.com/videos/3190131/free-video-3190131.jpg?auto=compress&cs=tinysrgb&fit=crop&h=630&w=1200"
  * }
  * Response:
  * {
  *   "_id": "673d4b33...",
- *   "title": "New Movie",
- *   "videoUrl": "https://...",
- *   "userId": "6721a9c4..."
+ *   "title": "A Modern Video Camera Recorder Mounted On A Camera Stand",
+ *   "pexelUser": "Chris Gonzalez",
+ *   "pexelsId": "3190131",
+ *   "miniatureUrl": "https://...",
+ *   "userId": "6721a9c4...",
+ *   "createdAt": "2024-01-15T10:30:00.000Z"
  * }
  */
 router.post('/', authMiddleware, createMovie);
