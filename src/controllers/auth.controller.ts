@@ -294,6 +294,27 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
   }
 };
 
+export async function changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Contraseña actual incorrecta" });
+        }
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedNewPassword;
+        await user.save();
+        res.json({ message: "Contraseña cambiada exitosamente" });
+    } catch (error) {
+        next(error);
+    }
+}
+
 /**
  * Retrieves the authenticated user's profile.
  *
