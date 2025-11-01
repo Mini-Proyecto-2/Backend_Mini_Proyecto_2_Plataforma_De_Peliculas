@@ -5,7 +5,7 @@
  */
 
 import { Router } from 'express';
-import { signup, login, logout, forgotPassword, resetPassword, getProfile, updateProfile, deleteProfile, session } from '../controllers/auth.controller';
+import { signup, login, logout, forgotPassword, resetPassword, getProfile, updateProfile, deleteProfile, session, changePassword } from '../controllers/auth.controller';
 const authMiddleware = require("../middleware/auth");
 const router = Router();
 
@@ -86,5 +86,7 @@ router.delete('/profile', authMiddleware, deleteProfile);
  * @access Private (requires JWT authentication)
  */
 router.get('/session', authMiddleware, session);
+
+router.post('/change-password', authMiddleware, changePassword);
 
 export default router;

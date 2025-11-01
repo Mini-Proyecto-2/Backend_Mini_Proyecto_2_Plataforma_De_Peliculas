@@ -47,8 +47,8 @@ const sendEmail = async (options: EmailOptions): Promise<void> => {
         from: `"Film Unity 👻" <${process.env.EMAIL_USER}>`,
         to: options.to,
         subject: options.subject,
-        text: options.text || "", // opcional
-        html: options.html || "", // 👈 importante para que se vea el contenido HTML
+        text: options.text || "", // optional
+        html: options.html || "", // important for displaying HTML content
     };
 
     await transporter.sendMail(mailOptions);
