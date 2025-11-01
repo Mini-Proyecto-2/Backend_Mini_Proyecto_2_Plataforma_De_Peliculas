@@ -44,7 +44,7 @@ const movieSchema = new mongoose.Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Referencia al modelo User
+    ref: 'User', // Reference to the User model
     required: true
   },
   createdAt: {
