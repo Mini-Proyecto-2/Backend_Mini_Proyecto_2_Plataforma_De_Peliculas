@@ -221,7 +221,7 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
 
     // Store in DB with expiration
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
     // Recovery URL
@@ -345,6 +345,27 @@ export async function resetPassword(req: Request, res: Response, next: NextFunct
   }
 };
 
+export async function changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.userId);
+        
+        if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Contraseña actual incorrecta" });
+        }
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedNewPassword;
+        await user.save();
+        res.json({ message: "Contraseña cambiada exitosamente" });
+    } catch (error) {
+        next(error);
+    }
+}
+
 /**
  * Retrieves the authenticated user's profile.
  *
@@ -396,13 +417,13 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
   try {
     const { firstName, lastName, age, email } = req.body;
 
-    // Validaciones
+    // Validations
     if (!firstName || !lastName || !age || !email) {
       return res.status(400).json({ message: "Todos los campos son requeridos" });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.user.userId, // ⚡ siempre usa el id del token, no del body
+      req.user.userId, // always use the id from the token, not from the body
       { firstName, lastName, age, email },
       { new: true, runValidators: true, context: "query" }
     ).select("-password -resetPasswordToken -resetPasswordExpires");
