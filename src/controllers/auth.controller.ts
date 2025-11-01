@@ -225,7 +225,7 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
     await user.save();
 
     // Recovery URL
-    const resetURL = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
+    const resetURL = `${process.env.FRONTEND_URL}/nueva-contraseña?token=${resetToken}`;
 
     // Email content
     const message = `
@@ -248,27 +248,78 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
 };
 
 /**
+ * Validates a password reset token.
+ *
+ * @function validateResetToken
+ * @async
+ * @param {Request} req - Express request object.
+ * @param {Object} req.query - Query parameters.
+ * @param {string} req.query.token - Reset token to validate.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Error handling middleware.
+ * @returns {Promise<void>} Resolves after sending the HTTP response.
+ * @remarks
+ * - Checks if the token exists, is not expired, and corresponds to a valid user.
+ * - Responds with HTTP 200 and `{ message: "Valid token" }` if valid.
+ * - Responds with HTTP 400 if token is missing, invalid, or expired.
+ */
+
+export async function validateResetToken(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "Token es requerido" });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }, // valid and not expired
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Token inválido o expirado" });
+    }
+
+    res.status(200).json({ message: "Token válido" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Resets the user's password using a valid, non-expired token.
  *
  * @function resetPassword
  * @async
  * @param {Request} req - Express request object.
- * @param {Object} req.params - Route parameters.
- * @param {string} req.params.token - Reset token.
  * @param {Object} req.body - Body payload.
+ * @param {string} req.body.token - Reset token.
  * @param {string} req.body.password - New password to set.
  * @param {Response} res - Express response object.
  * @param {NextFunction} next - Error handling middleware.
  * @returns {Promise<void>} Resolves after sending the HTTP response.
  * @remarks
+ * - Validates password complexity (≥ 8 chars, at least one uppercase, one lowercase and one special character).
  * - Hashes the new password and clears `resetPasswordToken` and `resetPasswordExpires`.
  */
 
 export async function resetPassword(req: Request, res: Response, next: NextFunction) {
   try {
-    const { token } = req.params;
-    const { password } = req.body;
-    console.log(token, password);
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: "Token y contraseña son requeridos" });
+    }
+
+    // Validate password BEFORE hashing
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          "La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una minúscula y un caracter especial",
+      });
+    }
 
     const user = await User.findOne({
       resetPasswordToken: token,
