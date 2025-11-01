@@ -5,7 +5,7 @@
  */
 
 import { Router } from 'express';
-import { signup, login, logout, forgotPassword, resetPassword, getProfile, updateProfile, deleteProfile, session, changePassword } from '../controllers/auth.controller';
+import { signup, login, logout, forgotPassword, validateResetToken, resetPassword, getProfile, updateProfile, deleteProfile, session, changePassword } from '../controllers/auth.controller';
 const authMiddleware = require("../middleware/auth");
 const router = Router();
 
@@ -53,11 +53,27 @@ router.post('/logout', logout);
 router.post('/forgot-password', forgotPassword);
 
 /**
- * @route POST /auth/reset-password/:token
+ * @route POST /auth/validate-reset-token
+ * @description Validates a password reset token before allowing password change.
+ * @access Public
+ * @example
+ * POST /auth/validate-reset-token
+ * Query params: ?token=abc123def456
+ */
+router.post('/validate-reset-token', validateResetToken);
+
+/**
+ * @route POST /auth/reset-password
  * @description Resets the user's password using a valid token from the reset email.
  * @access Public
+ * @example
+ * POST /auth/reset-password
+ * {
+ *   "token": "abc123def456",
+ *   "password": "NuevaContraseña123!"
+ * }
  */
-router.post('/reset-password/:token', resetPassword);
+router.post('/reset-password', resetPassword);
 
 /**
  * @route GET /auth/profile
